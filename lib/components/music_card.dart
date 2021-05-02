@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class MusicCard extends StatefulWidget {
+  final int id;
   final bool isCardSelected;
   final String albumImg;
   final String songName;
@@ -10,7 +11,8 @@ class MusicCard extends StatefulWidget {
   final Function onPress;
 
   const MusicCard(
-      {@required this.isCardSelected,
+      {@required this.id,
+      @required this.isCardSelected,
       @required this.albumImg,
       @required this.songName,
       @required this.artist,
@@ -39,9 +41,22 @@ class _MusicCardState extends State<MusicCard> {
           padding: EdgeInsets.all(15.0),
           child: Row(
             children: <Widget>[
-              Image.network(
-                "${widget.albumImg}",
-                width: 75.0,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.network(
+                    "${widget.albumImg}",
+                    width: 75.0,
+                  ),
+                  widget.isCardSelected
+                      ? Center(
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            size: 50.0,
+                          ),
+                        )
+                      : Container()
+                ],
               ),
               SizedBox(
                 width: 10.0,

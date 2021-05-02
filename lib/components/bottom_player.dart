@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:musicify/model/music_data.dart';
+import 'package:musicify/utilities/constants.dart';
 
 class BottomPlayer extends StatelessWidget {
   BottomPlayer({
@@ -25,9 +26,7 @@ class BottomPlayer extends StatelessWidget {
       alignment: FractionalOffset.bottomCenter,
       child: Container(
         height: 100.0,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-            color: Colors.grey),
+        decoration: kBottomBoxDecoration,
         child: Column(
           children: <Widget>[
             Expanded(
@@ -43,7 +42,7 @@ class BottomPlayer extends StatelessWidget {
                   ),
                   Material(
                     borderRadius: BorderRadius.circular(20.0),
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withOpacity(0.1),
                     child: IconButton(
                         iconSize: 52.0,
                         icon: getIcons(isPlaying),
@@ -53,7 +52,7 @@ class BottomPlayer extends StatelessWidget {
                     iconSize: 45.0,
                     icon: Icon(Icons.skip_next),
                     onPressed: onNextPressed,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -61,30 +60,31 @@ class BottomPlayer extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Text(
-                        "${position.inMinutes}:${position.inSeconds.remainder(60)}",
-                        style: TextStyle(fontSize: 18.0),
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Text(
+                      "${position.inMinutes}:${position.inSeconds.remainder(60)}",
+                      style: kTextTime,
+                    ),
+                    Expanded(
+                      child: Slider.adaptive(
+                        activeColor: Colors.cyanAccent,
+                        inactiveColor: Colors.white,
+                        max: musicLength.inSeconds.toDouble(),
+                        value: position.inSeconds.toDouble(),
+                        onChanged: (value) {
+                          onSeekBar(value);
+                        },
                       ),
-                      Expanded(
-                        child: Slider.adaptive(
-                          activeColor: Colors.cyanAccent,
-                          inactiveColor: Colors.white,
-                          max: musicLength.inSeconds.toDouble(),
-                          value: position.inSeconds.toDouble(),
-                          onChanged: (value) {
-                            onSeekBar(value);
-                          },
-                        ),
-                      ),
-                      Text(
-                        "${musicLength.inMinutes}:${musicLength.inSeconds.remainder(60)}",
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ]),
+                    ),
+                    Text(
+                      "${musicLength.inMinutes}:${musicLength.inSeconds.remainder(60)}",
+                      style: kTextTime,
+                    ),
+                  ],
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),
