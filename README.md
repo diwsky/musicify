@@ -1,5 +1,7 @@
 # Musicify
 
+![No playlist](https://i.imgur.com/gK2wez4.png) ![After searching](https://i.imgur.com/x4r8QkW.png)
+ 
 A simple music player using Flutter!
 
 ## Features
@@ -46,9 +48,4 @@ This project directory consist of 4 directories:
    - `itunes_handler`: _provide the MediaData list from iTunes Affiliate API_
 
 Library that used to play the audio file: [AudioPlayers](https://pub.dev/packages/audioplayers) v0.18.3
-
-## Screenshots
-![No playlist](https://imgur.com/gK2wez4)
-![After searching](https://imgur.com/x4r8QkW)
- 
    
