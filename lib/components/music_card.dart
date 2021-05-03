@@ -32,6 +32,7 @@ class _MusicCardState extends State<MusicCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      key: Key('cardTouched'),
       onTap: widget.onPress,
       child: Container(
         decoration: BoxDecoration(
@@ -46,6 +47,10 @@ class _MusicCardState extends State<MusicCard> {
                 children: [
                   Image.network(
                     "${widget.albumImg}",
+                    errorBuilder: (BuildContext context, Object exception,
+                        StackTrace trace) {
+                      return Text("Image Error!");
+                    },
                     width: 75.0,
                   ),
                   widget.isCardSelected

@@ -13,7 +13,8 @@ class ApiCall {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      print(response.body);
+      throw Exception('Failed to load music: ${response.body}');
+      // print('error');
     }
   }
 }

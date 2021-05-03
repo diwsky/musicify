@@ -57,6 +57,12 @@ class _HomepageState extends State<Homepage> {
   }
 
   @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -71,7 +77,7 @@ class _HomepageState extends State<Homepage> {
               flex: 1,
               child: SearchBox(
                 onSearched: (query) {
-                  searchSongOrArtist(query);
+                  _searchSongOrArtist(query);
                 },
               ),
             ),
@@ -80,7 +86,7 @@ class _HomepageState extends State<Homepage> {
               child: Stack(
                 children: <Widget>[
                   // List song
-                  showMusicList(_playList),
+                  _showMusicList(_playList),
 
                   // Bottom player
                   Visibility(
@@ -102,7 +108,7 @@ class _HomepageState extends State<Homepage> {
                         }
                       },
                       onSeekBar: (value) {
-                        seekToSec(value.toInt());
+                        _seekToSec(value.toInt());
                       },
                       position: _position,
                       musicLength: _musicLength,
@@ -117,9 +123,9 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  showMusicList(List<MusicData> playList) {
+  _showMusicList(List<MusicData> playList) {
     return playList.isEmpty
-        ? showEmptyList()
+        ? _showEmptyList()
         : ListView(
             children: playList.map((eachData) {
               return new MusicCard(
@@ -130,13 +136,13 @@ class _HomepageState extends State<Homepage> {
                   artist: eachData.artist,
                   album: eachData.album,
                   onPress: () {
-                    playTheMusic(eachData);
+                    _playTheMusic(eachData);
                   });
             }).toList(),
           );
   }
 
-  void playTheMusic(MusicData data) async {
+  void _playTheMusic(MusicData data) async {
     int result = await _player.play(data.songUrl, isLocal: false);
     print('Result play music: $result');
 
@@ -147,7 +153,7 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
-  Future<void> searchSongOrArtist(String _query) async {
+  Future<void> _searchSongOrArtist(String _query) async {
     List<MusicData> current =
         await ItunesHandler().getPlayListFromQuery(_query);
     setState(() {
@@ -155,12 +161,12 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
-  void seekToSec(int value) async {
+  void _seekToSec(int value) async {
     Duration newPos = Duration(seconds: value);
     _player.seek(newPos);
   }
 
-  Widget showEmptyList() {
+  Widget _showEmptyList() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

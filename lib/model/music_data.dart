@@ -5,11 +5,9 @@ class MusicData {
   String album;
   String albumUrl;
   String songUrl;
-  bool isSelected;
 
   MusicData(
       {this.id,
-      this.isSelected,
       this.title,
       this.artist,
       this.album,
@@ -24,11 +22,8 @@ class MusicData {
     String album = json['collectionName'];
     String songUrl = json['previewUrl'];
 
-    print('title: $title, aritst: $artist, songUrl: $songUrl');
-
     return MusicData(
         id: id,
-        isSelected: false,
         title: title,
         artist: artist,
         album: album,

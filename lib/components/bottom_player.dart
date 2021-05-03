@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:musicify/model/music_data.dart';
 import 'package:musicify/utilities/constants.dart';
 
 class BottomPlayer extends StatelessWidget {
@@ -63,7 +62,7 @@ class BottomPlayer extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     Text(
-                      "${position.inMinutes}:${position.inSeconds.remainder(60)}",
+                      "${position.inMinutes}:${getPaddedTime(position.inSeconds.remainder(60).toString())}",
                       style: kTextTime,
                     ),
                     Expanded(
@@ -89,6 +88,10 @@ class BottomPlayer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String getPaddedTime(String input) {
+    return input.padLeft(2, '0');
   }
 
   Icon getIcons(bool isPlaying) {
