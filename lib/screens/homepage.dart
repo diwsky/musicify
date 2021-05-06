@@ -14,12 +14,14 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  final ScrollController _scrollController = new ScrollController();
   bool _isPlaying;
   bool _isBottomBarShowingUp;
   int _currentId;
 
   // List of songs
-  List<MusicData> _playList;
+  List<Widget> _playListWidget;
 
   // Music player
   AudioPlayer _player;
@@ -29,10 +31,17 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
+
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   _searchSongOrArtist(_query);
+    // });
+
+    _scrollController.addListener(() {});
+
     _isPlaying = false;
     _isBottomBarShowingUp = false;
 
-    _playList = [];
+    _playListWidget = [];
     _player = AudioPlayer();
     // AudioPlayer.logEnabled = true;
 
@@ -86,7 +95,7 @@ class _HomepageState extends State<Homepage> {
               child: Stack(
                 children: <Widget>[
                   // List song
-                  _showMusicList(_playList),
+                  _showMusicList(_playListWidget),
 
                   // Bottom player
                   Visibility(
@@ -123,41 +132,56 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  _showMusicList(List<MusicData> playList) {
-    return playList.isEmpty
-        ? _showEmptyList()
-        : ListView(
-            children: playList.map((eachData) {
-              return new MusicCard(
-                  id: eachData.id,
-                  isCardSelected: _currentId == eachData.id,
-                  albumImg: eachData.albumUrl,
-                  songName: eachData.title,
-                  artist: eachData.artist,
-                  album: eachData.album,
-                  onPress: () {
-                    _playTheMusic(eachData);
-                  });
-            }).toList(),
-          );
+  Tween<Offset> _offset = Tween(begin: const Offset(1, 0), end: Offset(0, 0));
+
+  Widget showListCards(List<Widget> playList) {
+    return ListView.builder(
+      itemCount: playList.length,
+      controller: _scrollController,
+      itemBuilder: (context, idx) {
+        print('in playlist: $idx');
+        return playList[idx];
+      },
+    );
   }
 
-  void _playTheMusic(MusicData data) async {
+  _showMusicList(List<Widget> playList) {
+    return playList.isEmpty ? _showEmptyList() : showListCards(playList);
+  }
+
+  void _playTheMusic(MusicData data, int idx) async {
     int result = await _player.play(data.songUrl, isLocal: false);
     print('Result play music: $result');
 
+    print('idx: $idx, data id: ${data.id}, currentID: $_currentId');
     setState(() {
-      _currentId = data.id;
+      _currentId = idx;
+      print('_currentID after setState: $_currentId');
       _isPlaying = true;
       _isBottomBarShowingUp = true;
     });
   }
 
-  Future<void> _searchSongOrArtist(String _query) async {
+  Future<void> _searchSongOrArtist(String _queryParam) async {
     List<MusicData> current =
-        await ItunesHandler().getPlayListFromQuery(_query);
+        await ItunesHandler().getPlayListFromQuery(_queryParam);
     setState(() {
-      _playList = current;
+      // _query = _queryParam;
+      _playListWidget = current.asMap().entries.map((data) {
+        int idx = data.key;
+        MusicData eachData = data.value;
+        return new MusicCard(
+            id: eachData.id,
+            isCardSelected: _currentId == idx,
+            albumImg: eachData.albumUrl,
+            songName: eachData.title,
+            artist: eachData.artist,
+            album: eachData.album,
+            onPress: () {
+              print('di onpressed, idx: $idx, and _currentId: $_currentId');
+              _playTheMusic(eachData, idx);
+            });
+      }).toList();
     });
   }
 

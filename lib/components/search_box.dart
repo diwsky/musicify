@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class SearchBox extends StatefulWidget {
@@ -10,12 +12,40 @@ class SearchBox extends StatefulWidget {
 }
 
 class _SearchBoxState extends State<SearchBox> {
+  final _searchQuery = new TextEditingController();
   String _query;
+  Timer _debounce;
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(
+      Duration(
+        milliseconds: 200,
+      ),
+      () {
+        print('hit api!!!');
+        widget.onSearched(_query);
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _query = "";
+    _searchQuery.addListener(() {
+      _onSearchChanged();
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchQuery.removeListener(() {
+      _onSearchChanged();
+    });
+    _searchQuery.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,6 +63,7 @@ class _SearchBoxState extends State<SearchBox> {
               onChanged: (value) {
                 _query = value;
               },
+              controller: _searchQuery,
               onSubmitted: (value) {
                 widget.onSearched(value);
               },
