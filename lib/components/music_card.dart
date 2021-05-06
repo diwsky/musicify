@@ -10,6 +10,7 @@ class MusicCard extends StatefulWidget {
   final String album;
   final Function onPress;
 
+  @deprecated
   const MusicCard(
       {@required this.id,
       @required this.isCardSelected,

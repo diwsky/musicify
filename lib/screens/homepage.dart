@@ -2,7 +2,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:musicify/components/bottom_player.dart';
-import 'package:musicify/components/music_card.dart';
 import 'package:musicify/components/search_box.dart';
 import 'package:musicify/model/music_data.dart';
 import 'package:musicify/utilities/constants.dart';
@@ -14,14 +13,13 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final ScrollController _scrollController = new ScrollController();
   bool _isPlaying;
   bool _isBottomBarShowingUp;
   int _currentId;
 
   // List of songs
-  List<Widget> _playListWidget;
+  List<MusicData> _playListData;
 
   // Music player
   AudioPlayer _player;
@@ -36,12 +34,14 @@ class _HomepageState extends State<Homepage> {
     //   _searchSongOrArtist(_query);
     // });
 
-    _scrollController.addListener(() {});
+    _scrollController.addListener(() {
+      print('add listenerrrr');
+    });
 
     _isPlaying = false;
     _isBottomBarShowingUp = false;
-
-    _playListWidget = [];
+    
+    _playListData = [];
     _player = AudioPlayer();
     // AudioPlayer.logEnabled = true;
 
@@ -95,7 +95,8 @@ class _HomepageState extends State<Homepage> {
               child: Stack(
                 children: <Widget>[
                   // List song
-                  _showMusicList(_playListWidget),
+                  // _showMusicList(_playListData),
+                  showListCards(_playListData),
 
                   // Bottom player
                   Visibility(
@@ -132,56 +133,57 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Tween<Offset> _offset = Tween(begin: const Offset(1, 0), end: Offset(0, 0));
-
-  Widget showListCards(List<Widget> playList) {
-    return ListView.builder(
-      itemCount: playList.length,
-      controller: _scrollController,
-      itemBuilder: (context, idx) {
-        print('in playlist: $idx');
-        return playList[idx];
-      },
-    );
+  Widget showListCards(List<MusicData> playList) {
+    print('onShowListCards...');
+    return playList.isEmpty
+        ? _showEmptyList()
+        : ListView.builder(
+            itemCount: playList.length,
+            controller: _scrollController,
+            itemBuilder: (context, idx) {
+              return ListTile(
+                leading: Image.network(playList[idx].albumUrl),
+                title: Text(playList[idx].title),
+                subtitle:
+                    Text('${playList[idx].artist} - ${playList[idx].album}'),
+                onTap: () {
+                  _playTheMusic(playList[idx]);
+                },
+                tileColor: playList[idx].id == _currentId
+                    ? Colors.black
+                    : Colors.grey[800],
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                trailing: playList[idx].id == _currentId
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.play_circle_fill, size: 35.0),
+                      )
+                    : null,
+              );
+            },
+          );
   }
 
-  _showMusicList(List<Widget> playList) {
-    return playList.isEmpty ? _showEmptyList() : showListCards(playList);
-  }
-
-  void _playTheMusic(MusicData data, int idx) async {
+  void _playTheMusic(MusicData data) async {
     int result = await _player.play(data.songUrl, isLocal: false);
     print('Result play music: $result');
+    print('_playTheMusic...');
 
-    print('idx: $idx, data id: ${data.id}, currentID: $_currentId');
     setState(() {
-      _currentId = idx;
-      print('_currentID after setState: $_currentId');
+      _currentId = data.id;
       _isPlaying = true;
       _isBottomBarShowingUp = true;
     });
   }
 
   Future<void> _searchSongOrArtist(String _queryParam) async {
+    print('search song or artist....');
     List<MusicData> current =
         await ItunesHandler().getPlayListFromQuery(_queryParam);
     setState(() {
       // _query = _queryParam;
-      _playListWidget = current.asMap().entries.map((data) {
-        int idx = data.key;
-        MusicData eachData = data.value;
-        return new MusicCard(
-            id: eachData.id,
-            isCardSelected: _currentId == idx,
-            albumImg: eachData.albumUrl,
-            songName: eachData.title,
-            artist: eachData.artist,
-            album: eachData.album,
-            onPress: () {
-              print('di onpressed, idx: $idx, and _currentId: $_currentId');
-              _playTheMusic(eachData, idx);
-            });
-      }).toList();
+      _playListData = current;
     });
   }
 
@@ -191,6 +193,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   Widget _showEmptyList() {
+    print('SHOW EMPTY!!!!!');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
